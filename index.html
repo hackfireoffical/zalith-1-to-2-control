@@ -36,7 +36,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div class="wrap">
 <header>
 <h1><span class="badge">ZL1 → ZL2</span> Control Converter</h1>
-<p class="sub">Convert <strong>Zalith Launcher 1</strong> / Pojav control JSON (<code>mControlDataList</code>) into a <strong>Zalith Launcher 2</strong> layout. Runs fully in your browser.</p>
+<p class="sub">Convert <strong>Zalith Launcher 1</strong> / Pojav control JSON (<code>mControlDataList</code>) into a <strong>Zalith Launcher 2</strong> layout. Runs fully in your browser. Joysticks are skipped (add them in the ZL2 editor).</p>
 </header>
 <div class="card" style="margin-bottom:16px">
 <div class="drop" id="dropzone">
@@ -108,13 +108,6 @@ function cBtn(btn,rw,rh,m){
   var style=mkStyle(btn),ev=keyEv(btn.keycodes);
   return{normal:{text:tstr(btn.name||"Btn"),uuid:uid(18),position:{x:x,y:y},buttonSize:{type:"percentage",widthDp:wDp,heightDp:hDp,widthPercentage:wp,heightPercentage:hp,widthReference:"screen_height",heightReference:"screen_height"},buttonStyle:style.uuid,textAlignment:"Center",textBold:false,textItalic:false,textUnderline:false,visibilityType:vis(btn),clickEvents:ev,isSwipple:!!btn.isSwipeable,isPenetrable:!!btn.passThruEnabled,isToggleable:!!btn.isToggle},style:style};
 }
-function cJoy(joy,rw,rh,m){
-  var wDp=typeof joy.width==="number"?joy.width:100,hDp=typeof joy.height==="number"?joy.height:100,d=2.5,wPx=wDp*d,hPx=hDp*d;
-  var xPx=evalDyn(joy.dynamicX||joy.x,rw,rh,wPx,hPx,m),yPx=evalDyn(joy.dynamicY||joy.y,rw,rh,wPx,hPx,m);
-  var x=clamp(Math.round((xPx/Math.max(rw-wPx,1))*10000),0,10000),y=clamp(Math.round((yPx/Math.max(rh-hPx,1))*10000),0,10000);
-  var sp=clamp(Math.round((Math.max(wPx,hPx)/rh)*10000),500,5000);
-  return{text:tstr(joy.name||"Joystick"),uuid:uid(18),position:{x:x,y:y},buttonSize:{type:"percentage",widthDp:wDp,heightDp:hDp,widthPercentage:sp,heightPercentage:sp,widthReference:"screen_height",heightReference:"screen_height"},buttonStyle:null,visibilityType:vis(joy),deadzone:0.1,triggerMode:"follow"};
-}
 function convert(src,opt){
   var rw=opt.refWidth||1920,rh=opt.refHeight||1080,m=4,warn=[];
   if(!src||typeof src!=="object")throw new Error("Input is not a JSON object.");
@@ -124,6 +117,7 @@ function convert(src,opt){
   var drawers=Array.isArray(src.mDrawerDataList)?src.mDrawerDataList:[];
   var joysticks=Array.isArray(src.mJoystickDataList)?src.mJoystickDataList:[];
   if(drawers.length)warn.push("Drawer groups ("+drawers.length+") flattened.");
+  if(joysticks.length)warn.push("Joysticks ("+joysticks.length+") skipped — add them in ZL2 editor if needed.");
   var styles=[],normals=[],joys=[];
   for(var i=0;i<buttons.length;i++){var r=cBtn(buttons[i],rw,rh,m);styles.push(r.style);normals.push(r.normal)}
   for(var d=0;d<drawers.length;d++){
@@ -131,17 +125,16 @@ function convert(src,opt){
     if(Array.isArray(ch))for(var c=0;c<ch.length;c++){var r2=cBtn(ch[c],rw,rh,m);styles.push(r2.style);normals.push(r2.normal)}
     if(dr.name||dr.keycodes){var r3=cBtn(dr,rw,rh,m);styles.push(r3.style);normals.push(r3.normal)}
   }
-  for(var j=0;j<joysticks.length;j++){try{joys.push(cJoy(joysticks[j],rw,rh,m))}catch(e){warn.push("Skipped joystick: "+e.message)}}
   function strip(list){return list.map(function(b){var o={};for(var k in b)o[k]=b[k];o.visibilityType="always";return o})}
   var always=normals.filter(function(b){return b.visibilityType==="always"});
   var inGame=normals.filter(function(b){return b.visibilityType==="in_game"});
   var inMenu=normals.filter(function(b){return b.visibilityType==="in_menu"});
   var layers=[];
-  if(always.length||joys.length)layers.push({name:"main",uuid:uid(12),hide:false,hideWhenMouse:true,hideWhenGamepad:true,visibilityType:"always",normalButtons:strip(always),textBoxes:[],joystickButtons:joys});
+  if(always.length||joys.length)layers.push({name:"main",uuid:uid(12),hide:false,hideWhenMouse:true,hideWhenGamepad:true,visibilityType:"always",normalButtons:strip(always),textBoxes:[],joystickButtons:[]});
   if(inGame.length)layers.push({name:"in_game",uuid:uid(12),hide:false,hideWhenMouse:true,hideWhenGamepad:true,visibilityType:"in_game",normalButtons:strip(inGame),textBoxes:[],joystickButtons:[]});
   if(inMenu.length)layers.push({name:"in_menu",uuid:uid(12),hide:false,hideWhenMouse:true,hideWhenGamepad:true,visibilityType:"in_menu",normalButtons:strip(inMenu),textBoxes:[],joystickButtons:[]});
   if(!layers.length)layers.push({name:"main",uuid:uid(12),hide:false,hideWhenMouse:true,hideWhenGamepad:true,visibilityType:"always",normalButtons:[],textBoxes:[],joystickButtons:[]});
-  return{layout:{info:{name:tstr(opt.name||"Converted from ZL1"),author:tstr(opt.author||"ZL1 to ZL2 Converter"),description:tstr("Converted from ZL1/Pojav"),versionCode:1,versionName:"1.0"},layers:layers,styles:styles,joystickStyles:[],editorVersion:12},stats:{buttons:normals.length,joysticks:joys.length,styles:styles.length,layers:layers.length},warnings:warn};
+  return{layout:{info:{name:tstr(opt.name||"Converted from ZL1"),author:tstr(opt.author||"ZL1 to ZL2 Converter"),description:tstr("Converted from ZL1/Pojav"),versionCode:1,versionName:"1.0"},layers:layers,styles:styles,joystickStyles:[],editorVersion:12},stats:{buttons:normals.length,joysticks:0,styles:styles.length,layers:layers.length},warnings:warn};
 }
 function $(id){return document.getElementById(id)}
 var inputEl=$("input"),outputEl=$("output"),statusEl=$("status"),statsEl=$("stats"),lastJson=null;
@@ -154,7 +147,7 @@ function doConvert(){
     var result=convert(src,{name:$("layoutName").value.trim()||"Converted from ZL1",author:$("layoutAuthor").value.trim()||"ZL1 to ZL2 Converter",refWidth:parseInt($("refWidth").value,10)||1920,refHeight:parseInt($("refHeight").value,10)||1080});
     lastJson=result.layout;outputEl.value=JSON.stringify(result.layout,null,2);
     $("btnDownload").disabled=false;$("btnCopy").disabled=false;statsEl.hidden=false;
-    statsEl.innerHTML='<div class="stat">Buttons: <strong>'+result.stats.buttons+'</strong></div><div class="stat">Joysticks: <strong>'+result.stats.joysticks+'</strong></div><div class="stat">Styles: <strong>'+result.stats.styles+'</strong></div><div class="stat">Layers: <strong>'+result.stats.layers+'</strong></div>';
+    statsEl.innerHTML='<div class="stat">Buttons: <strong>'+result.stats.buttons+'</strong></div><div class="stat">Joysticks: <strong>0 (skipped)</strong></div><div class="stat">Styles: <strong>'+result.stats.styles+'</strong></div><div class="stat">Layers: <strong>'+result.stats.layers+'</strong></div>';
     if(result.warnings.length)setStatus("warn","Converted with notes:\n• "+result.warnings.join("\n• "));
     else setStatus("ok","Conversion OK. Download and import in Zalith Launcher 2 → Control list.");
   }catch(e){setStatus("err",e.message||String(e))}

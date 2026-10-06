@@ -195,7 +195,7 @@ function setStatus(type, text) {
   statusEl.innerHTML = text ? '<div class="msg ' + type + '">' + escapeHtml(text) + '</div>' : "";
 }
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, function(c) { return { "&":"&","<":"<",">":">","\"":""","'":"&#39;" }[c]; });
+  return String(s).replace(/[&<>"']/g, function(c) { return { "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]; });
 }
 
 function doConvert() {
@@ -237,14 +237,25 @@ $("btnCopy").addEventListener("click", function() {
 });
 
 var drop = $("dropzone"), fileInput = $("fileInput");
-drop.addEventListener("click", function() { fileInput.click(); });
-drop.addEventListener("dragover", function(e) { e.preventDefault(); drop.classList.add("dragover"); });
-drop.addEventListener("dragleave", function() { drop.classList.remove("dragover"); });
+// Label[for=fileInput] opens the picker natively; also support explicit button + drag-drop
+var btnPick = $("btnPickFile");
+if (btnPick) {
+  btnPick.addEventListener("click", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    fileInput.value = "";
+    fileInput.click();
+  });
+}
+drop.addEventListener("dragover", function(e) { e.preventDefault(); e.stopPropagation(); drop.classList.add("dragover"); });
+drop.addEventListener("dragleave", function(e) { e.preventDefault(); drop.classList.remove("dragover"); });
 drop.addEventListener("drop", function(e) {
-  e.preventDefault(); drop.classList.remove("dragover");
-  if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
+  e.preventDefault(); e.stopPropagation(); drop.classList.remove("dragover");
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
 });
-fileInput.addEventListener("change", function() { if (fileInput.files[0]) readFile(fileInput.files[0]); });
+fileInput.addEventListener("change", function() {
+  if (fileInput.files && fileInput.files[0]) readFile(fileInput.files[0]);
+});
 function readFile(f) {
   var reader = new FileReader();
   reader.onload = function() {

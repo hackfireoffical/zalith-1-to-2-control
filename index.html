@@ -1,215 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ZL1 → ZL2 Control Converter</title>
-  <meta name="description" content="Convert Zalith Launcher 1 / Pojav control JSON to Zalith Launcher 2 control layout format." />
-  <style>
-    :root {
-      --bg: #0f1419;
-      --card: #1a2332;
-      --border: #2d3a4f;
-      --text: #e7ecf3;
-      --muted: #8b9bb4;
-      --accent: #3d8bfd;
-      --accent-hover: #5a9fff;
-      --ok: #3dd68c;
-      --warn: #f5a524;
-      --err: #f31260;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(1200px 600px at 10% -10%, #1a2a44 0%, var(--bg) 55%);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-    }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
-    header { margin-bottom: 28px; }
-    h1 { font-size: 1.75rem; margin: 0 0 8px; letter-spacing: -0.02em; }
-    .sub { color: var(--muted); font-size: 0.95rem; max-width: 70ch; }
-    .badge {
-      display: inline-block; font-size: 0.75rem; padding: 2px 8px;
-      border-radius: 999px; background: #1e3a5f; color: #9ec5ff;
-      margin-right: 6px; vertical-align: middle;
-    }
-    .grid { display: grid; gap: 16px; }
-    @media (min-width: 900px) {
-      .grid-2 { grid-template-columns: 1fr 1fr; }
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-    }
-    .card h2 { font-size: 1rem; margin: 0 0 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-    .field label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
-    input[type="text"], textarea {
-      width: 100%;
-      background: #0d1219;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 10px 12px;
-      font-size: 0.9rem;
-    }
-    textarea {
-      font-family: var(--mono);
-      font-size: 0.8rem;
-      min-height: 220px;
-      resize: vertical;
-    }
-    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
-    button {
-      appearance: none; border: none; cursor: pointer;
-      background: var(--accent); color: #fff;
-      padding: 10px 16px; border-radius: 8px;
-      font-size: 0.9rem; font-weight: 600;
-    }
-    button:hover { background: var(--accent-hover); }
-    button.secondary {
-      background: transparent; border: 1px solid var(--border); color: var(--text);
-    }
-    button.secondary:hover { border-color: var(--accent); color: var(--accent); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .drop {
-      position: relative;
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 28px 16px;
-      text-align: center;
-      color: var(--muted);
-      transition: border-color .15s, background .15s;
-      overflow: hidden;
-      min-height: 88px;
-    }
-    .drop:hover, .drop.dragover {
-      border-color: var(--accent);
-      background: #152238;
-      color: var(--text);
-    }
-    .drop-label {
-      pointer-events: none;
-      position: relative;
-      z-index: 1;
-    }
-    .drop input[type="file"] {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 2;
-      font-size: 0;
-    }
-    .msg { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; white-space: pre-wrap; }
-    .msg.ok { background: #123024; color: var(--ok); border: 1px solid #1f5c3d; }
-    .msg.warn { background: #2a2210; color: var(--warn); border: 1px solid #5c4a1a; }
-    .msg.err { background: #2a1218; color: var(--err); border: 1px solid #5c1a2e; }
-    .stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-    .stat {
-      background: #0d1219; border: 1px solid var(--border);
-      border-radius: 8px; padding: 8px 12px; font-size: 0.85rem;
-    }
-    .stat strong { color: var(--accent); }
-    footer { margin-top: 40px; color: var(--muted); font-size: 0.8rem; }
-    footer a { color: var(--accent); }
-    .field { margin-bottom: 12px; }
-    details { margin-top: 16px; }
-    summary { cursor: pointer; color: var(--muted); }
-    code { font-family: var(--mono); font-size: 0.85em; background: #0d1219; padding: 1px 5px; border-radius: 4px; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ZL1 → ZL2 Control Converter</title>
+<style>
+:root{--bg:#0f1419;--card:#1a2332;--border:#2d3a4f;--text:#e7ecf3;--muted:#8b9bb4;--accent:#3d8bfd;--ok:#3dd68c;--warn:#f5a524;--err:#f31260;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#1a2a44 0%,var(--bg) 55%);color:var(--text);min-height:100vh;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}header{margin-bottom:28px}h1{font-size:1.75rem;margin:0 0 8px}.sub{color:var(--muted);font-size:.95rem;max-width:70ch}
+.badge{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:999px;background:#1e3a5f;color:#9ec5ff;margin-right:6px}
+.grid{display:grid;gap:16px}@media(min-width:900px){.grid-2{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.card h2{font-size:1rem;margin:0 0 12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.field label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+input[type=text],textarea{width:100%;background:#0d1219;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:.9rem}
+textarea{font-family:var(--mono);font-size:.8rem;min-height:220px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+button{appearance:none;border:none;cursor:pointer;background:var(--accent);color:#fff;padding:10px 16px;border-radius:8px;font-size:.9rem;font-weight:600}
+button.secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.drop{position:relative;border:2px dashed var(--border);border-radius:12px;padding:28px 16px;text-align:center;color:var(--muted);cursor:pointer;overflow:hidden}
+.drop:hover,.drop.dragover{border-color:var(--accent);background:#152238;color:var(--text)}
+.drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+.msg{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:.9rem;white-space:pre-wrap}
+.msg.ok{background:#123024;color:var(--ok);border:1px solid #1f5c3d}
+.msg.warn{background:#2a2210;color:var(--warn);border:1px solid #5c4a1a}
+.msg.err{background:#2a1218;color:var(--err);border:1px solid #5c1a2e}
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.stat{background:#0d1219;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.85rem}
+.stat strong{color:var(--accent)}footer{margin-top:40px;color:var(--muted);font-size:.8rem}footer a{color:var(--accent)}
+.field{margin-bottom:12px}code{font-family:var(--mono);font-size:.85em;background:#0d1219;padding:1px 5px;border-radius:4px}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>
-        <span class="badge">ZL1 → ZL2</span>
-        Control Converter
-      </h1>
-      <p class="sub">
-        Convert <strong>Zalith Launcher 1</strong> / Pojav / FCL-style control JSON
-        (<code>mControlDataList</code>) into a
-        <strong>Zalith Launcher 2</strong> control layout
-        (<code>editorVersion</code> + layers). Runs entirely in your browser — files never leave your device.
-      </p>
-    </header>
-
-    <div class="card" style="margin-bottom:16px">
-      <div class="drop" id="dropzone">
-        <div class="drop-label">
-          Drop a <code>.json</code> control file here, or <strong>tap / click to choose</strong>
-        </div>
-        <input type="file" id="fileInput" accept=".json,application/json,text/json" />
-      </div>
-
-      <div class="row">
-        <div class="field" style="flex:1;min-width:180px;margin:0">
-          <label for="layoutName">Layout name</label>
-          <input type="text" id="layoutName" value="Converted from ZL1" maxlength="64" />
-        </div>
-        <div class="field" style="flex:1;min-width:140px;margin:0">
-          <label for="layoutAuthor">Author</label>
-          <input type="text" id="layoutAuthor" value="ZL1→ZL2 Converter" maxlength="64" />
-        </div>
-        <div class="field" style="width:140px;margin:0">
-          <label for="refWidth">Ref width (px)</label>
-          <input type="text" id="refWidth" value="1920" />
-        </div>
-        <div class="field" style="width:140px;margin:0">
-          <label for="refHeight">Ref height (px)</label>
-          <input type="text" id="refHeight" value="1080" />
-        </div>
-      </div>
-      <div class="row">
-        <button type="button" id="btnConvert">Convert</button>
-        <button type="button" class="secondary" id="btnSample">Load sample ZL1</button>
-        <button type="button" class="secondary" id="btnDownload" disabled>Download ZL2 JSON</button>
-        <button type="button" class="secondary" id="btnCopy" disabled>Copy output</button>
-      </div>
-      <div id="status"></div>
-      <div class="stats" id="stats" hidden></div>
-    </div>
-
-    <div class="grid grid-2">
-      <div class="card">
-        <h2>Input (ZL1 / Pojav)</h2>
-        <textarea id="input" spellcheck="false" placeholder='Paste ZL1 control JSON with "mControlDataList" …'></textarea>
-      </div>
-      <div class="card">
-        <h2>Output (ZL2 layout)</h2>
-        <textarea id="output" spellcheck="false" readonly placeholder="Converted layout appears here…"></textarea>
-      </div>
-    </div>
-
-    <details class="card" style="margin-top:16px">
-      <summary>How to use the converted file in Zalith Launcher 2</summary>
-      <ol>
-        <li>Download the converted <code>.json</code>.</li>
-        <li>On your phone: Zalith Launcher 2 → Settings → <strong>Control list</strong>.</li>
-        <li>Import / share the JSON into the control layouts folder.</li>
-        <li>Open the layout in the editor and tweak positions if needed.</li>
-      </ol>
-      <p style="color:var(--muted);font-size:0.9rem">
-        Special buttons (Keyboard, GUI, mouse left/right/middle, scroll) are mapped where possible.
-        Middle mouse uses <code>GLFW_MOUSE_BUTTON_MIDDLE</code>.
-      </p>
-    </details>
-
-    <footer>
-      Open source converter for the community.
-      Formats based on
-      <a href="https://github.com/ZalithLauncher/ZalithLauncher2" target="_blank" rel="noopener">ZalithLauncher2</a>.
-      · <a href="https://github.com/hackfireoffical/zalith-1-to-2-control">Source</a>
-    </footer>
-  </div>
-
-  <script src="converter.js"></script>
+<div class="wrap">
+<header>
+<h1><span class="badge">ZL1 → ZL2</span> Control Converter</h1>
+<p class="sub">Convert <strong>Zalith Launcher 1</strong> / Pojav control JSON (<code>mControlDataList</code>) into a <strong>Zalith Launcher 2</strong> layout. Runs fully in your browser.</p>
+</header>
+<div class="card" style="margin-bottom:16px">
+<div class="drop" id="dropzone">
+Drop a <code>.json</code> control file here, or click this area to choose
+<input type="file" id="fileInput" accept=".json,application/json,text/json,.JSON"/>
+</div>
+<div class="row">
+<div class="field" style="flex:1;min-width:180px;margin:0"><label for="layoutName">Layout name</label><input type="text" id="layoutName" value="Converted from ZL1" maxlength="64"/></div>
+<div class="field" style="flex:1;min-width:140px;margin:0"><label for="layoutAuthor">Author</label><input type="text" id="layoutAuthor" value="ZL1 to ZL2 Converter" maxlength="64"/></div>
+<div class="field" style="width:140px;margin:0"><label for="refWidth">Ref width</label><input type="text" id="refWidth" value="1920"/></div>
+<div class="field" style="width:140px;margin:0"><label for="refHeight">Ref height</label><input type="text" id="refHeight" value="1080"/></div>
+</div>
+<div class="row">
+<button type="button" id="btnConvert">Convert</button>
+<button type="button" class="secondary" id="btnSample">Load sample ZL1</button>
+<button type="button" class="secondary" id="btnDownload" disabled>Download ZL2 JSON</button>
+<button type="button" class="secondary" id="btnCopy" disabled>Copy output</button>
+</div>
+<div id="status"></div>
+<div class="stats" id="stats" hidden></div>
+</div>
+<div class="grid grid-2">
+<div class="card"><h2>Input (ZL1 / Pojav)</h2><textarea id="input" spellcheck="false" placeholder='Paste ZL1 JSON with "mControlDataList"…'></textarea></div>
+<div class="card"><h2>Output (ZL2 layout)</h2><textarea id="output" spellcheck="false" readonly placeholder="Converted layout appears here…"></textarea></div>
+</div>
+<footer style="margin-top:24px">Community tool · <a href="https://github.com/hackfireoffical/zalith-1-to-2-control">Source</a></footer>
+</div>
+<script>
+(function(){
+"use strict";
+var GLFW={32:"GLFW_KEY_SPACE",39:"GLFW_KEY_APOSTROPHE",44:"GLFW_KEY_COMMA",45:"GLFW_KEY_MINUS",46:"GLFW_KEY_PERIOD",47:"GLFW_KEY_SLASH",48:"GLFW_KEY_0",49:"GLFW_KEY_1",50:"GLFW_KEY_2",51:"GLFW_KEY_3",52:"GLFW_KEY_4",53:"GLFW_KEY_5",54:"GLFW_KEY_6",55:"GLFW_KEY_7",56:"GLFW_KEY_8",57:"GLFW_KEY_9",59:"GLFW_KEY_SEMICOLON",61:"GLFW_KEY_EQUAL",65:"GLFW_KEY_A",66:"GLFW_KEY_B",67:"GLFW_KEY_C",68:"GLFW_KEY_D",69:"GLFW_KEY_E",70:"GLFW_KEY_F",71:"GLFW_KEY_G",72:"GLFW_KEY_H",73:"GLFW_KEY_I",74:"GLFW_KEY_J",75:"GLFW_KEY_K",76:"GLFW_KEY_L",77:"GLFW_KEY_M",78:"GLFW_KEY_N",79:"GLFW_KEY_O",80:"GLFW_KEY_P",81:"GLFW_KEY_Q",82:"GLFW_KEY_R",83:"GLFW_KEY_S",84:"GLFW_KEY_T",85:"GLFW_KEY_U",86:"GLFW_KEY_V",87:"GLFW_KEY_W",88:"GLFW_KEY_X",89:"GLFW_KEY_Y",90:"GLFW_KEY_Z",91:"GLFW_KEY_LEFT_BRACKET",92:"GLFW_KEY_BACKSLASH",93:"GLFW_KEY_RIGHT_BRACKET",96:"GLFW_KEY_GRAVE_ACCENT",256:"GLFW_KEY_ESCAPE",257:"GLFW_KEY_ENTER",258:"GLFW_KEY_TAB",259:"GLFW_KEY_BACKSPACE",260:"GLFW_KEY_INSERT",261:"GLFW_KEY_DELETE",262:"GLFW_KEY_RIGHT",263:"GLFW_KEY_LEFT",264:"GLFW_KEY_DOWN",265:"GLFW_KEY_UP",266:"GLFW_KEY_PAGE_UP",267:"GLFW_KEY_PAGE_DOWN",268:"GLFW_KEY_HOME",269:"GLFW_KEY_END",280:"GLFW_KEY_CAPS_LOCK",281:"GLFW_KEY_SCROLL_LOCK",282:"GLFW_KEY_NUM_LOCK",283:"GLFW_KEY_PRINT_SCREEN",284:"GLFW_KEY_PAUSE",290:"GLFW_KEY_F1",291:"GLFW_KEY_F2",292:"GLFW_KEY_F3",293:"GLFW_KEY_F4",294:"GLFW_KEY_F5",295:"GLFW_KEY_F6",296:"GLFW_KEY_F7",297:"GLFW_KEY_F8",298:"GLFW_KEY_F9",299:"GLFW_KEY_F10",300:"GLFW_KEY_F11",301:"GLFW_KEY_F12",340:"GLFW_KEY_LEFT_SHIFT",341:"GLFW_KEY_LEFT_CONTROL",342:"GLFW_KEY_LEFT_ALT",343:"GLFW_KEY_LEFT_SUPER",344:"GLFW_KEY_RIGHT_SHIFT",345:"GLFW_KEY_RIGHT_CONTROL",346:"GLFW_KEY_RIGHT_ALT",347:"GLFW_KEY_RIGHT_SUPER",348:"GLFW_KEY_MENU"};
+var SPECIAL={};
+SPECIAL[-1]={type:"launcher_event",key:"launcher.event.switch_keyboard"};
+SPECIAL[-2]={type:"launcher_event",key:"launcher.event.switch_menu"};
+SPECIAL[-3]={type:"key",key:"GLFW_MOUSE_BUTTON_LEFT"};
+SPECIAL[-4]={type:"key",key:"GLFW_MOUSE_BUTTON_RIGHT"};
+SPECIAL[-5]={type:"launcher_event",key:"launcher.event.switch_ime"};
+SPECIAL[-6]={type:"key",key:"GLFW_MOUSE_BUTTON_MIDDLE"};
+SPECIAL[-7]={type:"launcher_event",key:"launcher.event.scroll_up"};
+SPECIAL[-8]={type:"launcher_event",key:"launcher.event.scroll_down"};
+SPECIAL[-9]={type:"launcher_event",key:"launcher.event.switch_menu"};
+function uid(n){n=n||12;var h="0123456789abcdef",s="";for(var i=0;i<n;i++)s+=h[(Math.random()*16)|0];return s}
+function tstr(v){return{default:String(v==null?"":v),matchQueue:[]}}
+function argb(c){return c==null?0x80000000:(c>>>0)}
+function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+function evalDyn(expr,rw,rh,bw,bh,m){
+  if(expr==null||expr==="")return 0;
+  var s=String(expr).trim();
+  if(/^-?\d+(\.\d+)?$/.test(s))return parseFloat(s);
+  var map={screen_width:rw,screen_height:rh,width:bw,height:bh,margin:m,top:0,left:0,right:rw-bw,bottom:rh-bh,preferred_scale:1};
+  s=s.replace(/\$\{([a-zA-Z_]+)\}/g,function(_,k){return map[k]===undefined?"0":String(map[k])});
+  if(!/^[\d\s+\-*/().]+$/.test(s))return 0;
+  try{var v=Function('"use strict";return ('+s+");")();return typeof v==="number"&&isFinite(v)?v:0}catch(e){return 0}
+}
+function vis(btn){var g=btn.displayInGame!==false,m=btn.displayInMenu!==false;if(g&&m)return"always";if(g&&!m)return"in_game";if(!g&&m)return"in_menu";return"always"}
+function keyEv(kcs){var e=[];if(!Array.isArray(kcs))return e;for(var i=0;i<kcs.length;i++){var kc=kcs[i];if(kc==null||kc===0)continue;if(SPECIAL[kc]){e.push({type:SPECIAL[kc].type,key:SPECIAL[kc].key});continue}var n=GLFW[kc];if(n)e.push({type:"key",key:n});else if(kc>0)e.push({type:"key",key:"GLFW_KEY_"+kc})}return e}
+function mkStyle(btn){
+  var id=uid(12),bg=argb(btn.bgColor!=null?btn.bgColor:0x4D000000),st=argb(btn.strokeColor!=null?btn.strokeColor:0xFFFFFFFF);
+  var a=typeof btn.opacity==="number"?clamp(btn.opacity,0,1):1,r=typeof btn.cornerRadius==="number"?clamp(btn.cornerRadius,0,100):0,bw=typeof btn.strokeWidth==="number"?btn.strokeWidth:0;
+  var rad={topStart:r,topEnd:r,bottomEnd:r,bottomStart:r};
+  var blk={alpha:a,pressedAlpha:clamp(a*0.85,0,1),backgroundColor:bg,pressedBackgroundColor:bg,contentColor:0xFFFFFFFF,pressedContentColor:0xFFFFFFFF,borderWidth:bw,pressedBorderWidth:bw,borderColor:st,pressedBorderColor:st,borderRadius:rad,pressedBorderRadius:{topStart:r,topEnd:r,bottomEnd:r,bottomStart:r}};
+  return{name:(btn.name||"style")+"_"+id.slice(0,4),uuid:id,animateSwap:false,commonStyle:false,lightStyle:blk,darkStyle:JSON.parse(JSON.stringify(blk))};
+}
+function cBtn(btn,rw,rh,m){
+  var wDp=typeof btn.width==="number"?btn.width:50,hDp=typeof btn.height==="number"?btn.height:50,d=2.5,wPx=wDp*d,hPx=hDp*d;
+  var xPx=evalDyn(btn.dynamicX,rw,rh,wPx,hPx,m),yPx=evalDyn(btn.dynamicY,rw,rh,wPx,hPx,m);
+  var x=clamp(Math.round((xPx/Math.max(rw-wPx,1))*10000),0,10000),y=clamp(Math.round((yPx/Math.max(rh-hPx,1))*10000),0,10000);
+  var wp=clamp(Math.round((wPx/rh)*10000),100,10000),hp=clamp(Math.round((hPx/rh)*10000),100,10000);
+  var style=mkStyle(btn),ev=keyEv(btn.keycodes);
+  return{normal:{text:tstr(btn.name||"Btn"),uuid:uid(18),position:{x:x,y:y},buttonSize:{type:"percentage",widthDp:wDp,heightDp:hDp,widthPercentage:wp,heightPercentage:hp,widthReference:"screen_height",heightReference:"screen_height"},buttonStyle:style.uuid,textAlignment:"center",textBold:false,textItalic:false,textUnderline:false,visibilityType:vis(btn),clickEvents:ev,isSwipple:!!btn.isSwipeable,isPenetrable:!!btn.passThruEnabled,isToggleable:!!btn.isToggle},style:style};
+}
+function cJoy(joy,rw,rh,m){
+  var wDp=typeof joy.width==="number"?joy.width:100,hDp=typeof joy.height==="number"?joy.height:100,d=2.5,wPx=wDp*d,hPx=hDp*d;
+  var xPx=evalDyn(joy.dynamicX||joy.x,rw,rh,wPx,hPx,m),yPx=evalDyn(joy.dynamicY||joy.y,rw,rh,wPx,hPx,m);
+  var x=clamp(Math.round((xPx/Math.max(rw-wPx,1))*10000),0,10000),y=clamp(Math.round((yPx/Math.max(rh-hPx,1))*10000),0,10000);
+  var sp=clamp(Math.round((Math.max(wPx,hPx)/rh)*10000),500,5000);
+  return{text:tstr(joy.name||"Joystick"),uuid:uid(18),position:{x:x,y:y},buttonSize:{type:"percentage",widthDp:wDp,heightDp:hDp,widthPercentage:sp,heightPercentage:sp,widthReference:"screen_height",heightReference:"screen_height"},buttonStyle:null,visibilityType:vis(joy),deadzone:0.1,triggerMode:"follow"};
+}
+function convert(src,opt){
+  var rw=opt.refWidth||1920,rh=opt.refHeight||1080,m=4,warn=[];
+  if(!src||typeof src!=="object")throw new Error("Input is not a JSON object.");
+  if(src.editorVersion!=null&&src.layers)throw new Error("Already a ZL2 layout (has editorVersion).");
+  var buttons=Array.isArray(src.mControlDataList)?src.mControlDataList:(Array.isArray(src.controlDataList)?src.controlDataList:null);
+  if(!buttons)throw new Error('Not a ZL1/Pojav file: missing "mControlDataList".');
+  var drawers=Array.isArray(src.mDrawerDataList)?src.mDrawerDataList:[];
+  var joysticks=Array.isArray(src.mJoystickDataList)?src.mJoystickDataList:[];
+  if(drawers.length)warn.push("Drawer groups ("+drawers.length+") flattened.");
+  var styles=[],normals=[],joys=[];
+  for(var i=0;i<buttons.length;i++){var r=cBtn(buttons[i],rw,rh,m);styles.push(r.style);normals.push(r.normal)}
+  for(var d=0;d<drawers.length;d++){
+    var dr=drawers[d],ch=dr.buttonProperties||dr.buttons||dr.mControlDataList||[];
+    if(Array.isArray(ch))for(var c=0;c<ch.length;c++){var r2=cBtn(ch[c],rw,rh,m);styles.push(r2.style);normals.push(r2.normal)}
+    if(dr.name||dr.keycodes){var r3=cBtn(dr,rw,rh,m);styles.push(r3.style);normals.push(r3.normal)}
+  }
+  for(var j=0;j<joysticks.length;j++){try{joys.push(cJoy(joysticks[j],rw,rh,m))}catch(e){warn.push("Skipped joystick: "+e.message)}}
+  function strip(list){return list.map(function(b){var o={};for(var k in b)o[k]=b[k];o.visibilityType="always";return o})}
+  var always=normals.filter(function(b){return b.visibilityType==="always"});
+  var inGame=normals.filter(function(b){return b.visibilityType==="in_game"});
+  var inMenu=normals.filter(function(b){return b.visibilityType==="in_menu"});
+  var layers=[];
+  if(always.length||joys.length)layers.push({name:"main",uuid:uid(12),hide:false,hideWhenMouse:true,hideWhenGamepad:true,visibilityType:"always",normalButtons:strip(always),textBoxes:[],joystickButtons:joys});
+  if(inGame.length)layers.push({name:"in_game",uuid:uid(12),hide:false,hideWhenMouse:true,hideWhenGamepad:true,visibilityType:"in_game",normalButtons:strip(inGame),textBoxes:[],joystickButtons:[]});
+  if(inMenu.length)layers.push({name:"in_menu",uuid:uid(12),hide:false,hideWhenMouse:true,hideWhenGamepad:true,visibilityType:"in_menu",normalButtons:strip(inMenu),textBoxes:[],joystickButtons:[]});
+  if(!layers.length)layers.push({name:"main",uuid:uid(12),hide:false,hideWhenMouse:true,hideWhenGamepad:true,visibilityType:"always",normalButtons:[],textBoxes:[],joystickButtons:[]});
+  return{layout:{info:{name:tstr(opt.name||"Converted from ZL1"),author:tstr(opt.author||"ZL1 to ZL2 Converter"),description:tstr("Converted from ZL1/Pojav"),versionCode:1,versionName:"1.0"},layers:layers,styles:styles,joystickStyles:[],editorVersion:12},stats:{buttons:normals.length,joysticks:joys.length,styles:styles.length,layers:layers.length},warnings:warn};
+}
+function $(id){return document.getElementById(id)}
+var inputEl=$("input"),outputEl=$("output"),statusEl=$("status"),statsEl=$("stats"),lastJson=null;
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
+function setStatus(t,text){statusEl.innerHTML=text?'<div class="msg '+t+'">'+esc(text)+"</div>":""}
+function doConvert(){
+  setStatus("","");statsEl.hidden=true;$("btnDownload").disabled=true;$("btnCopy").disabled=true;lastJson=null;outputEl.value="";
+  var src;try{src=JSON.parse(inputEl.value)}catch(e){setStatus("err","Invalid JSON: "+e.message);return}
+  try{
+    var result=convert(src,{name:$("layoutName").value.trim()||"Converted from ZL1",author:$("layoutAuthor").value.trim()||"ZL1 to ZL2 Converter",refWidth:parseInt($("refWidth").value,10)||1920,refHeight:parseInt($("refHeight").value,10)||1080});
+    lastJson=result.layout;outputEl.value=JSON.stringify(result.layout,null,2);
+    $("btnDownload").disabled=false;$("btnCopy").disabled=false;statsEl.hidden=false;
+    statsEl.innerHTML='<div class="stat">Buttons: <strong>'+result.stats.buttons+'</strong></div><div class="stat">Joysticks: <strong>'+result.stats.joysticks+'</strong></div><div class="stat">Styles: <strong>'+result.stats.styles+'</strong></div><div class="stat">Layers: <strong>'+result.stats.layers+'</strong></div>';
+    if(result.warnings.length)setStatus("warn","Converted with notes:\n• "+result.warnings.join("\n• "));
+    else setStatus("ok","Conversion OK. Download and import in Zalith Launcher 2 → Control list.");
+  }catch(e){setStatus("err",e.message||String(e))}
+}
+$("btnConvert").onclick=doConvert;
+$("btnDownload").onclick=function(){
+  if(!lastJson)return;
+  var name=($("layoutName").value.trim()||"converted").replace(/[^\w\-]+/g,"_");
+  var blob=new Blob([JSON.stringify(lastJson,null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name+"_zl2.json";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(a.href);
+};
+$("btnCopy").onclick=function(){
+  if(!outputEl.value)return;
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(outputEl.value).then(function(){setStatus("ok","Copied.")}).catch(function(){outputEl.select();setStatus("warn","Copy manually (Ctrl+C).")});
+  else{outputEl.select();setStatus("warn","Copy manually (Ctrl+C).")}
+};
+var drop=$("dropzone"),fileInput=$("fileInput");
+drop.addEventListener("dragover",function(e){e.preventDefault();drop.classList.add("dragover")});
+drop.addEventListener("dragleave",function(){drop.classList.remove("dragover")});
+drop.addEventListener("drop",function(e){e.preventDefault();drop.classList.remove("dragover");if(e.dataTransfer&&e.dataTransfer.files[0])readFile(e.dataTransfer.files[0])});
+fileInput.addEventListener("change",function(){if(fileInput.files&&fileInput.files[0]){readFile(fileInput.files[0]);fileInput.value=""}});
+function readFile(f){
+  var r=new FileReader();
+  r.onload=function(){inputEl.value=r.result;if(!$("layoutName").dataset.touched)$("layoutName").value=f.name.replace(/\.json$/i,"")||"Converted from ZL1";doConvert()};
+  r.onerror=function(){setStatus("err","Could not read file.")};
+  r.readAsText(f);
+}
+$("layoutName").oninput=function(){$("layoutName").dataset.touched="1"};
+$("btnSample").onclick=function(){
+  inputEl.value=JSON.stringify({mControlDataList:[
+    {name:"W",keycodes:[87,0,0,0],dynamicX:"${margin} * 2 + ${width}",dynamicY:"${bottom} - ${margin} * 3 - ${height} * 2",width:50,height:50,opacity:1,bgColor:1291845632,strokeColor:-1,isSwipeable:true,displayInGame:true,displayInMenu:false},
+    {name:"A",keycodes:[65,0,0,0],dynamicX:"${margin}",dynamicY:"${bottom} - ${margin} * 2 - ${height}",width:50,height:50,opacity:1,bgColor:1291845632,strokeColor:-1,isSwipeable:true,displayInGame:true,displayInMenu:false},
+    {name:"S",keycodes:[83,0,0,0],dynamicX:"${margin} * 2 + ${width}",dynamicY:"${bottom} - ${margin}",width:50,height:50,opacity:1,bgColor:1291845632,strokeColor:-1,isSwipeable:true,displayInGame:true,displayInMenu:false},
+    {name:"D",keycodes:[68,0,0,0],dynamicX:"${margin} * 3 + ${width} * 2",dynamicY:"${bottom} - ${margin} * 2 - ${height}",width:50,height:50,opacity:1,bgColor:1291845632,strokeColor:-1,isSwipeable:true,displayInGame:true,displayInMenu:false},
+    {name:"Jump",keycodes:[32,0,0,0],dynamicX:"${right} - ${margin}",dynamicY:"${bottom} - ${margin}",width:50,height:50,opacity:1,bgColor:1291845632,strokeColor:-1,displayInGame:true,displayInMenu:false},
+    {name:"PRI",keycodes:[-3,0,0,0],dynamicX:"${margin}",dynamicY:"${screen_height} - ${margin} * 3 - ${height} * 3",width:50,height:50,opacity:1,bgColor:1291845632,strokeColor:-1,displayInGame:true,displayInMenu:true},
+    {name:"SEC",keycodes:[-4,0,0,0],dynamicX:"${margin} * 3 + ${width} * 2",dynamicY:"${screen_height} - ${margin} * 3 - ${height} * 3",width:50,height:50,opacity:1,bgColor:1291845632,strokeColor:-1,displayInGame:true,displayInMenu:true},
+    {name:"MID",keycodes:[-6,0,0,0],dynamicX:"${right} - ${margin}",dynamicY:"${margin} * 2 + ${height}",width:50,height:50,opacity:1,bgColor:1291845632,strokeColor:-1,displayInGame:true,displayInMenu:true}
+  ],mDrawerDataList:[],mJoystickDataList:[],scaledAt:100,version:8},null,2);
+  $("layoutName").value="Sample WASD";doConvert();
+};
+})();
+</script>
 </body>
 </html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ZL1 → ZL2 Control Converter</title>
+  <meta name="description" content="Convert Zalith Launcher 1 / Pojav control JSON to Zalith Launcher 2 control layout format." />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a2332;
+      --border: #2d3a4f;
+      --text: #e7ecf3;
+      --muted: #8b9bb4;
+      --accent: #3d8bfd;
+      --accent-hover: #5a9fff;
+      --ok: #3dd68c;
+      --warn: #f5a524;
+      --err: #f31260;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, #1a2a44 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+    header { margin-bottom: 28px; }
+    h1 { font-size: 1.75rem; margin: 0 0 8px; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); font-size: 0.95rem; max-width: 70ch; }
+    .badge {
+      display: inline-block; font-size: 0.75rem; padding: 2px 8px;
+      border-radius: 999px; background: #1e3a5f; color: #9ec5ff;
+      margin-right: 6px; vertical-align: middle;
+    }
+    .grid { display: grid; gap: 16px; }
+    @media (min-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .card h2 { font-size: 1rem; margin: 0 0 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+    input[type="text"], textarea {
+      width: 100%;
+      background: #0d1219;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+    textarea {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      min-height: 220px;
+      resize: vertical;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+    button {
+      appearance: none; border: none; cursor: pointer;
+      background: var(--accent); color: #fff;
+      padding: 10px 16px; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 600;
+    }
+    button:hover { background: var(--accent-hover); }
+    button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    button.secondary:hover { border-color: var(--accent); color: var(--accent); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .drop {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--muted);
+      transition: border-color .15s, background .15s;
+      cursor: pointer;
+    }
+    .drop.dragover { border-color: var(--accent); background: #152238; color: var(--text); }
+    .msg { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; white-space: pre-wrap; }
+    .msg.ok { background: #123024; color: var(--ok); border: 1px solid #1f5c3d; }
+    .msg.warn { background: #2a2210; color: var(--warn); border: 1px solid #5c4a1a; }
+    .msg.err { background: #2a1218; color: var(--err); border: 1px solid #5c1a2e; }
+    .stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+    .stat {
+      background: #0d1219; border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px; font-size: 0.85rem;
+    }
+    .stat strong { color: var(--accent); }
+    footer { margin-top: 40px; color: var(--muted); font-size: 0.8rem; }
+    footer a { color: var(--accent); }
+    .field { margin-bottom: 12px; }
+    details { margin-top: 16px; }
+    summary { cursor: pointer; color: var(--muted); }
+    code { font-family: var(--mono); font-size: 0.85em; background: #0d1219; padding: 1px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>
+        <span class="badge">ZL1 → ZL2</span>
+        Control Converter
+      </h1>
+      <p class="sub">
+        Convert <strong>Zalith Launcher 1</strong> / Pojav / FCL-style control JSON
+        (<code>mControlDataList</code>) into a
+        <strong>Zalith Launcher 2</strong> control layout
+        (<code>editorVersion</code> + layers). Runs entirely in your browser — files never leave your device.
+      </p>
+    </header>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="drop" id="dropzone" tabindex="0">
+        Drop a <code>.json</code> control file here, or click to choose
+        <input type="file" id="fileInput" accept=".json,application/json,text/json" hidden />
+      </div>
+      <div class="row">
+        <div class="field" style="flex:1;min-width:180px;margin:0">
+          <label for="layoutName">Layout name</label>
+          <input type="text" id="layoutName" value="Converted from ZL1" maxlength="64" />
+        </div>
+        <div class="field" style="flex:1;min-width:140px;margin:0">
+          <label for="layoutAuthor">Author</label>
+          <input type="text" id="layoutAuthor" value="ZL1→ZL2 Converter" maxlength="64" />
+        </div>
+        <div class="field" style="width:140px;margin:0">
+          <label for="refWidth">Ref width (px)</label>
+          <input type="text" id="refWidth" value="1920" />
+        </div>
+        <div class="field" style="width:140px;margin:0">
+          <label for="refHeight">Ref height (px)</label>
+          <input type="text" id="refHeight" value="1080" />
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnConvert">Convert</button>
+        <button class="secondary" id="btnSample">Load sample ZL1</button>
+        <button class="secondary" id="btnDownload" disabled>Download ZL2 JSON</button>
+        <button class="secondary" id="btnCopy" disabled>Copy output</button>
+      </div>
+      <div id="status"></div>
+      <div class="stats" id="stats" hidden></div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h2>Input (ZL1 / Pojav)</h2>
+        <textarea id="input" spellcheck="false" placeholder='Paste ZL1 control JSON with "mControlDataList" …'></textarea>
+      </div>
+      <div class="card">
+        <h2>Output (ZL2 layout)</h2>
+        <textarea id="output" spellcheck="false" readonly placeholder="Converted layout appears here…"></textarea>
+      </div>
+    </div>
+
+    <details class="card" style="margin-top:16px">
+      <summary>How to use the converted file in Zalith Launcher 2</summary>
+      <ol>
+        <li>Download the converted <code>.json</code>.</li>
+        <li>On your phone: Zalith Launcher 2 → Settings → <strong>Control list</strong>.</li>
+        <li>Import / share the JSON into the control layouts folder.</li>
+        <li>Open the layout in the editor and tweak positions if needed — conversion approximates ZL1 dynamic expressions on a reference resolution.</li>
+      </ol>
+      <p style="color:var(--muted);font-size:0.9rem">
+        Special buttons (Keyboard, GUI toggle, mouse left/right/middle, scroll) are mapped where possible.
+        Drawer groups are flattened. Middle mouse uses <code>GLFW_MOUSE_BUTTON_MIDDLE</code>.
+      </p>
+    </details>
+
+    <footer>
+      Open source converter for the community.
+      Formats based on
+      <a href="https://github.com/ZalithLauncher/ZalithLauncher2" target="_blank" rel="noopener">ZalithLauncher2</a>
+      LayerController and Pojav <code>ControlData</code>.
+      Not affiliated with MovTery / official Zalith.
+      · <a href="https://github.com/hackfireoffical/zalith-1-to-2-control">Source</a>
+    </footer>
+  </div>
+
+  <script src="converter.js"></script>
+</body>
+</html>

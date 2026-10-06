@@ -36,7 +36,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div class="wrap">
 <header>
 <h1><span class="badge">ZL1 → ZL2</span> Control Converter</h1>
-<p class="sub">Convert <strong>Zalith Launcher 1</strong> / Pojav control JSON (<code>mControlDataList</code>) into a <strong>Zalith Launcher 2</strong> layout. Runs fully in your browser. Joysticks are skipped (add them in the ZL2 editor).</p>
+<p class="sub">Convert <strong>Zalith Launcher 1</strong> / Pojav control JSON (<code>mControlDataList</code>) into a <strong>Zalith Launcher 2</strong> layout. Runs fully in your browser. Joysticks are skipped. Positions are approximate — fine-tune in the ZL2 editor.</p>
 </header>
 <div class="card" style="margin-bottom:16px">
 <div class="drop" id="dropzone">
@@ -101,10 +101,20 @@ function mkStyle(btn){
   return{name:(btn.name||"style")+"_"+id.slice(0,4),uuid:id,animateSwap:false,commonStyle:false,lightStyle:blk,darkStyle:JSON.parse(JSON.stringify(blk))};
 }
 function cBtn(btn,rw,rh,m){
-  var wDp=typeof btn.width==="number"?btn.width:50,hDp=typeof btn.height==="number"?btn.height:50,d=2.5,wPx=wDp*d,hPx=hDp*d;
-  var xPx=evalDyn(btn.dynamicX,rw,rh,wPx,hPx,m),yPx=evalDyn(btn.dynamicY,rw,rh,wPx,hPx,m);
-  var x=clamp(Math.round((xPx/Math.max(rw-wPx,1))*10000),0,10000),y=clamp(Math.round((yPx/Math.max(rh-hPx,1))*10000),0,10000);
-  var wp=clamp(Math.round((wPx/rh)*10000),100,10000),hp=clamp(Math.round((hPx/rh)*10000),100,10000);
+  var wDp=typeof btn.width==="number"?btn.width:50,hDp=typeof btn.height==="number"?btn.height:50;
+  var dens=2;
+  var wPx=wDp*dens,hPx=hDp*dens;
+  var xPx,yPx;
+  if(typeof btn.x==="number"&&isFinite(btn.x)&&typeof btn.y==="number"&&isFinite(btn.y)){
+    xPx=btn.x; yPx=btn.y;
+  }else{
+    xPx=evalDyn(btn.dynamicX,rw,rh,wPx,hPx,m);
+    yPx=evalDyn(btn.dynamicY,rw,rh,wPx,hPx,m);
+  }
+  var x=clamp(Math.round((xPx/Math.max(rw-wPx,1))*10000),0,10000);
+  var y=clamp(Math.round((yPx/Math.max(rh-hPx,1))*10000),0,10000);
+  var wp=clamp(Math.round((wPx/rh)*10000),200,3500);
+  var hp=clamp(Math.round((hPx/rh)*10000),200,3500);
   var style=mkStyle(btn),ev=keyEv(btn.keycodes);
   return{normal:{text:tstr(btn.name||"Btn"),uuid:uid(18),position:{x:x,y:y},buttonSize:{type:"percentage",widthDp:wDp,heightDp:hDp,widthPercentage:wp,heightPercentage:hp,widthReference:"screen_height",heightReference:"screen_height"},buttonStyle:style.uuid,textAlignment:"Center",textBold:false,textItalic:false,textUnderline:false,visibilityType:vis(btn),clickEvents:ev,isSwipple:!!btn.isSwipeable,isPenetrable:!!btn.passThruEnabled,isToggleable:!!btn.isToggle},style:style};
 }
@@ -118,6 +128,7 @@ function convert(src,opt){
   var joysticks=Array.isArray(src.mJoystickDataList)?src.mJoystickDataList:[];
   if(drawers.length)warn.push("Drawer groups ("+drawers.length+") flattened.");
   if(joysticks.length)warn.push("Joysticks ("+joysticks.length+") skipped — add them in ZL2 editor if needed.");
+  warn.push("Positions/sizes are approximate. Drag and resize buttons in the ZL2 control editor.");
   var styles=[],normals=[],joys=[];
   for(var i=0;i<buttons.length;i++){var r=cBtn(buttons[i],rw,rh,m);styles.push(r.style);normals.push(r.normal)}
   for(var d=0;d<drawers.length;d++){

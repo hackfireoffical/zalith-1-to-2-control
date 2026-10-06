@@ -106,7 +106,7 @@ function cBtn(btn,rw,rh,m){
   var x=clamp(Math.round((xPx/Math.max(rw-wPx,1))*10000),0,10000),y=clamp(Math.round((yPx/Math.max(rh-hPx,1))*10000),0,10000);
   var wp=clamp(Math.round((wPx/rh)*10000),100,10000),hp=clamp(Math.round((hPx/rh)*10000),100,10000);
   var style=mkStyle(btn),ev=keyEv(btn.keycodes);
-  return{normal:{text:tstr(btn.name||"Btn"),uuid:uid(18),position:{x:x,y:y},buttonSize:{type:"percentage",widthDp:wDp,heightDp:hDp,widthPercentage:wp,heightPercentage:hp,widthReference:"screen_height",heightReference:"screen_height"},buttonStyle:style.uuid,textAlignment:"center",textBold:false,textItalic:false,textUnderline:false,visibilityType:vis(btn),clickEvents:ev,isSwipple:!!btn.isSwipeable,isPenetrable:!!btn.passThruEnabled,isToggleable:!!btn.isToggle},style:style};
+  return{normal:{text:tstr(btn.name||"Btn"),uuid:uid(18),position:{x:x,y:y},buttonSize:{type:"percentage",widthDp:wDp,heightDp:hDp,widthPercentage:wp,heightPercentage:hp,widthReference:"screen_height",heightReference:"screen_height"},buttonStyle:style.uuid,textAlignment:"Center",textBold:false,textItalic:false,textUnderline:false,visibilityType:vis(btn),clickEvents:ev,isSwipple:!!btn.isSwipeable,isPenetrable:!!btn.passThruEnabled,isToggleable:!!btn.isToggle},style:style};
 }
 function cJoy(joy,rw,rh,m){
   var wDp=typeof joy.width==="number"?joy.width:100,hDp=typeof joy.height==="number"?joy.height:100,d=2.5,wPx=wDp*d,hPx=hDp*d;

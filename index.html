@@ -95,7 +95,7 @@ function vis(btn){var g=btn.displayInGame!==false,m=btn.displayInMenu!==false;if
 function keyEv(kcs){var e=[];if(!Array.isArray(kcs))return e;for(var i=0;i<kcs.length;i++){var kc=kcs[i];if(kc==null||kc===0)continue;if(SPECIAL[kc]){e.push({type:SPECIAL[kc].type,key:SPECIAL[kc].key});continue}var n=GLFW[kc];if(n)e.push({type:"key",key:n});else if(kc>0)e.push({type:"key",key:"GLFW_KEY_"+kc})}return e}
 function mkStyle(btn){
   var id=uid(12),bg=argb(btn.bgColor!=null?btn.bgColor:0x4D000000),st=argb(btn.strokeColor!=null?btn.strokeColor:0xFFFFFFFF);
-  var a=typeof btn.opacity==="number"?clamp(btn.opacity,0,1):1,r=typeof btn.cornerRadius==="number"?clamp(btn.cornerRadius,0,100):0,bw=typeof btn.strokeWidth==="number"?btn.strokeWidth:0;
+  var a=typeof btn.opacity==="number"?clamp(btn.opacity,0,1):1,r=typeof btn.cornerRadius==="number"?clamp(btn.cornerRadius,0,100):0,bw=typeof btn.strokeWidth==="number"?Math.max(0,Math.round(btn.strokeWidth)):0;
   var rad={topStart:r,topEnd:r,bottomEnd:r,bottomStart:r};
   var blk={alpha:a,pressedAlpha:clamp(a*0.85,0,1),backgroundColor:bg,pressedBackgroundColor:bg,contentColor:0xFFFFFFFF,pressedContentColor:0xFFFFFFFF,borderWidth:bw,pressedBorderWidth:bw,borderColor:st,pressedBorderColor:st,borderRadius:rad,pressedBorderRadius:{topStart:r,topEnd:r,bottomEnd:r,bottomStart:r}};
   return{name:(btn.name||"style")+"_"+id.slice(0,4),uuid:id,animateSwap:false,commonStyle:false,lightStyle:blk,darkStyle:JSON.parse(JSON.stringify(blk))};
